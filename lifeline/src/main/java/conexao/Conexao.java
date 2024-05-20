@@ -13,8 +13,8 @@ public class Conexao {
     data.setUrl("jdbc:mysql://localhost:3306/lifeline");
 //    data.setUsername("lifeline_user");
 //    data.setPassword("urubu100");
-    data.setUsername("root");
-    data.setPassword("215912");
+    data.setUsername("Kells_Student");
+    data.setPassword("Cpf1809@@");
 
     conexao = new JdbcTemplate(data);
   }

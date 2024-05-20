@@ -2,6 +2,7 @@ import com.github.britooo.looca.api.core.Looca;
 import com.github.britooo.looca.api.group.janelas.Janela;
 import com.github.britooo.looca.api.group.janelas.JanelaGrupo;
 import com.github.britooo.looca.api.group.processos.Processo;
+import com.github.britooo.looca.api.group.sistema.Sistema;
 import conexao.Conexao;
 import maquina.Conversor;
 import maquina.Limite;
@@ -13,6 +14,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import usuario.Usuario;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 
 public class Teste {
@@ -29,7 +31,6 @@ public class Teste {
 //        } catch (EmptyResultDataAccessException e) {
 //            System.out.println("vazio");
 //        }
-        Looca looca = new Looca();
 
 //        System.out.println(looca.getRede().getParametros().getHostName());
 
@@ -67,9 +68,26 @@ public class Teste {
 //        System.out.println(looca.getTemperatura().getTemperatura().doubleValue());
 
         // PULANDO LOGIN
-        Usuario usuario = new Usuario("joao@techinnovations.com", "senha123");
-        Maquina maquina = new Maquina();
+//        Usuario usuario = new Usuario("joao@techinnovations.com", "senha123");
+//        Maquina maquina = new Maquina();
+//
+//        maquina.verificarMaquina(usuario.getIdUsuario());
+                try {
+                    Looca looca = new Looca();
+                    Sistema sistema = looca.getSistema();
 
-        maquina.verificarMaquina(usuario.getIdUsuario());
-    }
-}
+                    if (sistema != null) {
+                        long tempoAtividade = sistema.getTempoDeAtividade();
+                        System.out.printf("Tempo de uso: %d dias, %d horas, %d minutos, %d segundos\n",
+                                TimeUnit.MILLISECONDS.toDays(tempoAtividade),
+                                TimeUnit.MILLISECONDS.toHours(tempoAtividade) % 24,
+                                TimeUnit.MILLISECONDS.toMinutes(tempoAtividade) % 60,
+                                TimeUnit.MILLISECONDS.toSeconds(tempoAtividade) % 60);
+                    } else {
+                        System.out.println("Não foi possível obter o tempo de atividade do sistema.");
+                    }
+                } catch (Exception e) {
+                    System.out.println("Erro ao inicializar Looca: " + e.getMessage());
+                }
+            }
+        }

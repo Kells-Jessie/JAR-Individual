@@ -1,9 +1,11 @@
+import com.github.britooo.looca.api.group.sistema.Sistema;
 import maquina.Limite;
 import maquina.Maquina;
 import maquina.Registro;
 import usuario.Usuario;
 
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 public class App {
     public static void main(String[] args) {
@@ -65,7 +67,27 @@ public class App {
     }
 
     private static void maquina(Usuario usuario) {
+        Scanner leitor = new Scanner(System.in);
         Maquina maquinaUsuario = new Maquina();
-        maquinaUsuario.verificarMaquina(usuario.getIdUsuario());
+        System.out.println("""
+        *------------------------------------*
+        |                Menu                |
+        *------------------------------------*
+        | 1 - Registros                      |
+        | 2 - Características                |
+        | 3 - Tempo de uso                   |
+        *------------------------------------*""");
+        Integer escolha = leitor.nextInt();
+        if (escolha.equals(1)) {
+            maquinaUsuario.verificarMaquina(usuario.getIdUsuario());
+        } else if (escolha.equals(2)) {
+            System.out.println(maquinaUsuario.toString());
+        } else if (escolha.equals(3)) {
+//            System.out.println(maquinaUsuario.mostrarTempoDeUso());
+            maquinaUsuario.mostrarTempoDeUso();
+        }
+        else{
+            System.out.println("valor inválido");
+        };
     }
 }

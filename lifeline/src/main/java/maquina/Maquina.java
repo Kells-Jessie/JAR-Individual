@@ -2,22 +2,23 @@ package maquina;
 
 import com.github.britooo.looca.api.core.Looca;
 import com.github.britooo.looca.api.group.rede.RedeInterface;
-import com.sun.tools.jconsole.JConsoleContext;
+import com.github.britooo.looca.api.group.sistema.Sistema;
 import conexao.Conexao;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 public class Maquina {
     Conexao conectar = new Conexao();
     JdbcTemplate conec = conectar.getConexao();
     Looca looca = new Looca();
 
+    private Sistema sistema;
     private Integer idMaquina;
     private String nomeMaquina;
     private String hostname;
@@ -26,6 +27,26 @@ public class Maquina {
     private Double maxCpu;
     private Double maxRam;
     private Double maxDisco;
+//    public Maquina() {
+//    }
+    public Maquina(Looca looca, Sistema sistema) {
+        this.looca = looca;
+        this.sistema = sistema;
+    }
+
+    public Maquina() {
+        try {
+            this.looca = new Looca();
+            this.sistema = looca.getSistema();
+            if (this.sistema == null) {
+                System.out.println("Erro: Não foi possível inicializar o objeto Sistema.");
+            } else {
+                System.out.println("Sistema inicializado com sucesso.");
+            }
+        } catch (Exception e) {
+            System.out.println("Erro ao inicializar Looca: " + e.getMessage());
+        }
+    }
 
     private void coletarDadosMaquina() {
         List<RedeInterface> listaRede = looca.getRede().getGrupoDeInterfaces().getInterfaces().stream().filter(redeInterface -> !redeInterface.getEnderecoIpv4().isEmpty()).toList();
@@ -38,6 +59,18 @@ public class Maquina {
         this.maxDisco = Conversor.converterDoubleTresDecimais(Conversor.formatarBytes(looca.getGrupoDeDiscos().getTamanhoTotal()));
     }
 
+    public void mostrarTempoDeUso() {
+        if (sistema != null) {
+            long tempoAtividade = sistema.getTempoDeAtividade();
+            System.out.printf("Tempo de uso: %d dias, %d horas, %d minutos, %d segundos\n",
+                    TimeUnit.MILLISECONDS.toDays(tempoAtividade),
+                    TimeUnit.MILLISECONDS.toHours(tempoAtividade) % 24,
+                    TimeUnit.MILLISECONDS.toMinutes(tempoAtividade) % 60,
+                    TimeUnit.MILLISECONDS.toSeconds(tempoAtividade) % 60);
+        } else {
+            System.out.println("Não foi possível obter o tempo de atividade do sistema.");
+        }
+    }
     private Integer escolhaMaquinas(Integer idUsuario) {
         try {
             // Procura maquinas com MAC Address nula com nome no banco
@@ -103,7 +136,7 @@ public class Maquina {
     public void verificarMaquina(Integer idUsuario) {
         coletarDadosMaquina();
         try {
-            // Procura maquina no banco pelo MAC Address
+            // Procura maquina no banco pelo hostName
             Integer idMaquina = conec.queryForObject("SELECT idMaquina FROM maquina WHERE fkUsuario = ? AND hostname = ? LIMIT 1"
                     , Integer.class, idUsuario, hostname);
 
@@ -206,6 +239,7 @@ public class Maquina {
 
     @Override
     public String toString() {
+        coletarDadosMaquina();
         return "Maquina{" +
                 "idMaquina=" + idMaquina +
                 ", nome='" + nomeMaquina + '\'' +
